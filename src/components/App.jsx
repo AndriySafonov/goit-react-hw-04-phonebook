@@ -6,6 +6,8 @@ import { FormContacts } from './FormContacts/FormContacts';
 import { FilterContacts } from './FilterContacts/FilterContacts';
 import { ContactList } from './ContactList/ContactList';
 
+
+
 export class App extends Component {
   state = {
     contacts: [
@@ -17,6 +19,9 @@ export class App extends Component {
     filter: '',
   };
 
+  //  метод, вызываемый после первого рендера компонента,
+  //  который загружает сохраненные контакты из localStorage
+  //  и устанавливает их в state.
   componentDidMount() {
     // console.log('App componentDidMount');
     const contacts = localStorage.getItem('contacts');
@@ -27,6 +32,9 @@ export class App extends Component {
     }
   }
 
+  // метод, вызываемый после каждого обновления компонента,
+  //  который сохраняет контакты в localStorage при 
+  // изменении массива contacts в state.
   componentDidUpdate(prevProps, prevState) {
     // console.log('App componentDidUpdate');
     if (this.state.contacts !== prevState.contacts) {
@@ -36,13 +44,19 @@ export class App extends Component {
     // console.log(prevState);
     // console.log(this.state);
   }
-
+  // добавляем новый контакт, в массив contacts в state
   addContact = ({ name, number }) => {
     const names = this.state.contacts.map(contact => contact.name);
+    
+    //  проверяем, существует ли контакт с таким же
+    // именем, и если да, то выводим предупреждение
     if (names.indexOf(name) >= 0) {
       alert(name + ' is already in contacts');
       return;
     }
+
+    //  Если контакт не существует, то добавляем его в 
+    // массив с помощью nanoid, генерирующей уникальный id
     this.setState(prevState => {
       return {
         contacts: [{ name, number, id: nanoid() }, ...prevState.contacts],
@@ -55,6 +69,8 @@ export class App extends Component {
     this.setState({ [name]: value });
   };
 
+  // удаляем контакт из массива contacts в state 
+  // компонента на основе его id
   deleteContact = id => {
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(contact => contact.id !== id),
