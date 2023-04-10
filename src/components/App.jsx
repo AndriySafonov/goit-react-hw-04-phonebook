@@ -14,16 +14,17 @@ export function App() {
   ]);
   const [filter, setFilter] = useState('');
 
-  
   // метод,  загружает сохраненные контакты из localStorage,
-  //  устанавливает их в состояние contacts и сохраняет их в 
+  //  устанавливает их в состояние contacts и сохраняет их в
   // localStorage при первом рендере компонента.
   useEffect(() => {
     const savedContacts = JSON.parse(localStorage.getItem('contacts') || '[]');
     setContacts(savedContacts);
-    localStorage.setItem('contacts', JSON.stringify(savedContacts));
   }, []);
-
+  // сохраняем текущее состояние contacts в localStorage, когда contacts изменяется.
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
   // добавляем новый контакт, в массив contacts в state
   const addContact = ({ name, number }) => {
@@ -34,28 +35,29 @@ export function App() {
       alert(`${name} is already in contacts`);
       return;
     }
-    // Если контакт не существует, то добавляем его в 
+    // Если контакт не существует, то добавляем его в
     // массив с помощью nanoid, генерирующей уникальный id
     setContacts(prevContacts => [
       { name, number, id: nanoid() },
       ...prevContacts,
     ]);
-    //  сохраняем массив контактов в localStorage, используя 
-    // JSON - строку с ключом "contacts".Массив состоит из 
+    //  сохраняем массив контактов в localStorage, используя
+    // JSON - строку с ключом "contacts".Массив состоит из
     // нового контакта и всех предыдущих контактов.
-    localStorage.setItem('contacts', JSON.stringify([
-      { name, number, id: nanoid() },
-      ...contacts,
-    ]));
+    localStorage.setItem(
+      'contacts',
+      JSON.stringify([{ name, number, id: nanoid() }, ...contacts])
+    );
   };
 
-
-  // удаляем контакт из массива contacts в state 
+  // удаляем контакт из массива contacts в state
   // компонента на основе его id
   const deleteContact = id => {
     setContacts(prevContacts =>
       prevContacts.filter(contact => contact.id !== id)
     );
+    const updatedContacts = contacts.filter(contact => contact.id !== id);
+    localStorage.setItem('contacts', JSON.stringify(updatedContacts));
   };
 
   return (
@@ -64,7 +66,10 @@ export function App() {
         <FormContacts onSubmit={addContact} />
       </Section>
       <Section title="Contacts">
-        <FilterContacts name={'filter'} filterInput={e => setFilter(e.target.value)} />
+        <FilterContacts
+          name={'filter'}
+          filterInput={e => setFilter(e.target.value)}
+        />
         <ContactList
           contacts={contacts.filter(contact =>
             contact.name.toLowerCase().includes(filter.toLowerCase())
